@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knocking on the door of Grass</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <style>
+        textarea {
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Knock on door grass</h1>
+
+        <ul class="nav nav-tabs mb-2" id="myTab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="home-tab" data-toggle="tab" href="#rules" role="tab" aria-controls="rules" aria-selected="true">Rules</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="profile-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="profile-tab" data-toggle="tab" href="#scripts" role="tab" aria-controls="scripts" aria-selected="false">Scripts</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade" id="scripts" role="tabpanel" aria-labelledby="scripts-tab">
+                <h3>Scripts</h3>
+                
+                <div class="form-group">
+                    <label for="script-windows-bat">Windows CMD/BAT</label>
+                    <textarea class="form-control" id="script-windows-bat" rows="15" readonly></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="script-bash">BASH (Linux, mac, unix)</label>
+                    <textarea class="form-control" id="script-bash" rows="15" readonly></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="script-router-os">Router OS/Mikrotik</label>
+                    <textarea class="form-control" id="script-router-os" rows="15" readonly></textarea>
+                </div>
+
+            </div>
+
+            <div class="tab-pane fade show active" id="rules" role="tabpanel" aria-labelledby="home-tab">
+                <div class="btn-toolbar mb-2" role="toolbar" aria-label="Toolbar with button groups">
+                    <div class="btn-group mr-2" role="group" aria-label="First group">
+                      <button id="btn-add-rule" type="button" class="btn btn-outline-secondary">Add</button>        
+                      <button id="btn-random-all-rules" type="button" class="btn btn-outline-secondary">Random all</button>
+                      <button id="btn-clear-all-rules" type="button" class="btn btn-outline-danger">Clear all</button>
+                    </div>
+                    <div class="btn-group mr-2" role="group" aria-label="Second group">
+                      <button id="btn-delete-rule" type="button" class="btn btn-outline-danger">Delete</button>
+                      <button id="btn-random-value-rule" type="button" class="btn btn-outline-secondary">Random value</button>
+                      <button id="btn-up-rule" type="button" class="btn btn-outline-secondary">Up</button>
+                      <button id="btn-down-rule" type="button" class="btn btn-outline-secondary">Down</button>
+                    </div>
+                    <div class="btn-group mr-2" role="group" aria-label="Second group">                      
+                      <button id="btn-make-scripts" type="button" class="btn btn-outline-primary">Make scripts</button>
+                    </div>
+                  </div>
+              
+                <table id="table-rules" class="table table-hover">
+                    <thead>
+                        <th>#</th>
+                        <th>Protocol</th>
+                        <th>Value</th>
+                        <th>Count</th>
+                        <th>Pause, sec</th>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+            </div>
+            <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="profile-tab">
+                <div class="form-group">
+                    <label for="idHostName">Hostname</label>
+                    <input class="form-control" id="idHostName" placeholder="" value="host01.example.com">
+                  </div>
+                <div class="form-group">
+                    <label for="idAddressListName">Address list name</label>
+                    <input class="form-control" id="idAddressListName" placeholder="" value="KnockKnockList">
+                  </div>
+                <div class="form-group">
+                    <label for="idStepTimeOut">Time out step</label>
+                    <input class="form-control" id="idStepTimeOut" placeholder="" value="00:00:15">
+                  </div>
+                <div class="form-group">
+                    <label for="idAllowTime">Allow time</label>
+                    <input class="form-control" id="idAllowTime" placeholder="" value="04:00:00">
+                  </div>
+
+            </div>
+          </div>
+
+
+        
+    </div>
+    <script>
+
+        var proto_select = '<div class="form-group"><select class="form-control  form-control select-proto"><option value="icmp">icmp<option value="tcp">tcp<option proto="udp">udp</select></div>';
+        var last_rule_id=0;
+
+        function getActiveRow() {
+            var tr = $('#table-rules tbody tr.active');
+            return tr.length ? tr : false;
+                
+            }
+
+        function trClick() {
+            $(this).closest('tbody').find('tr').removeClass('table-primary active');
+            $(this).addClass('table-primary active');
+        }
+
+        function setActiveRow(tr) {
+            $(tr).closest('tbody').find('tr').removeClass('table-primary active');
+            $(tr).addClass('table-primary active');
+        }
+
+        function addRule() {
+            last_rule_id++
+            var $tr = $('<TR>');
+                $tr.data('id', last_rule_id);
+
+                $tr.append(
+                    $('<TD>').append( last_rule_id ),
+                    $('<TD>').append( proto_select ),
+                    $('<TD>').append( '<div class="form-group"><INPUT class="input-value form-control " type="number" min=0 max=65000 value=' + getRandomValue() + '></div>' ),
+                    $('<TD>').append( '<div class="form-group"><INPUT class="input-count form-control " type="number" min=1 max=100 value="1"></div>' ),
+                    $('<TD>').append( '<div class="form-group"><INPUT class="input-pause form-control " type="number" min=1 max=100 value="0"></div>' ),
+                );
+
+                $tr.on('click', trClick);
+            $('#table-rules tbody').append( $tr );
+            setActiveRow( $tr );
+        };
+
+        var scripts = {
+            bat : [],
+            bash: [],
+            router_os: []
+        };
+
+        function makeScripts() {
+            console.log('make scripts...');
+            
+            settings.hostname = idHostName.value;
+
+            //bat start
+            scripts.bat = [];
+            scripts.bash = ["#!/bin/bash"];
+            scripts.router_os = [];
+
+            //scripts.bat.push('@echo off');
+            //scripts.bat.push('SET HOSTNAME=' + settings.hostname  );            
+
+            var step = 0;
+            var prev_step = null;
+            var rules_count = $('#table-rules tbody tr').length;
+            var allowTime = idAllowTime.value;
+            
+            $('#table-rules tbody tr').each(function(){
+                step++;
+                var proto = $(this).find('.select-proto').val();
+                var value = $(this).find('.input-value').val();
+                var count = $(this).find('.input-count').val();
+                var pause = $(this).find('.input-pause').val();
+                var rule_id = $(this).data('id');
+                var adrressListName = idAddressListName.value;
+                var addressListNameStepRule = adrressListName + '_step' + step;
+                var stepTimeOut = idStepTimeOut.value;
+                
+                if ( step == rules_count ) {
+                    addressListNameStepRule = adrressListName + '';
+                    stepTimeOut = idAllowTime.value + '';
+                }
+
+                var prevousStep = null;
+                var prevStepRouterOsCode = '';
+
+                if (step > 1) {
+                    prevousStep = step - 1;
+                    var addressListNamePrevStepRule = adrressListName + '_step' + prevousStep;
+                    prevStepRouterOsCode = `src-address-list=${addressListNamePrevStepRule}`
+                }
+
+                
+                if (proto === 'icmp') {
+                    //bat
+                    var bat_size = value - 28;
+                    scripts.bat.push('ping ' + settings.hostname  + ' -l ' + bat_size + ' -n ' + count);
+
+                    //bash
+                    var bash_size = value - 28;
+                    scripts.bash.push('ping ' + settings.hostname + ' -s ' + bash_size + ' -c ' + count + ';' );
+
+                    //router_os
+                    
+                    scripts.router_os.push(
+                        `/ip firewall raw add chain=prerouting protocol=icmp ${prevStepRouterOsCode} packet-size=${value} action=add-src-to-address-list address-list=${addressListNameStepRule} address-list-timeout=${stepTimeOut}`
+                        )
+
+                }
+
+                if (proto === 'tcp') {
+                    scripts.bash.push('curl --connect-timeout ' + count + ' '  + settings.hostname + ':' + value +  ';' );
+                }
+
+                //pause
+                if (pause > 0) {
+                        scripts.bat.push('timeout /NOBREAK /T ' + pause);
+                        scripts.bash.push('sleep ' + pause + ';');
+                }
+
+            })
+
+
+            $('#script-windows-bat').val( scripts.bat.join("\r\n") );
+            $('#script-bash').val( scripts.bash.join("\r\n") );
+            $('#script-router-os').val( scripts.router_os.join("\r\n") );
+        }
+
+        function getRandomValue(proto = 'icmp') {
+
+            var range=settings.range[proto];
+
+            var max = range[1] - range[0]
+
+            return range[0] + Math.floor(Math.random() * Math.floor(max));
+            
+        }
+
+        $('#btn-random-all-rules').click(function() {
+            $('#table-rules tbody tr').each(function(){
+                randomRowValue(this);
+            })
+        })
+
+        $('#btn-make-scripts').on('click', makeScripts);
+
+        $('#btn-up-rule').click(function() {
+            var tr = getActiveRow();
+            if (!tr) return;
+
+            var $tbody = $('#table-rules tbody');
+            var length = $tbody.children().length;
+            var index = tr.index();
+
+            if (index > 0) {
+                var next = tr.prev();
+                tr.detach();
+                next.before( tr );
+            }
+
+            console.log({length, index})
+        } );
+
+        $('#btn-down-rule').click(function() {
+            var tr = getActiveRow();
+            if (!tr) return;
+
+            var $tbody = $('#table-rules tbody');
+            var length = $tbody.children().length;
+            var index = tr.index();
+
+            if (index < length-1) {
+                var next = tr.next();
+                tr.detach();
+                next.after( tr );
+            }
+
+            console.log({length, index})
+        } );
+
+        function randomRowValue(tr) {
+            var proto = $(tr).find('.select-proto').val()
+            $(tr).find('.input-value').val( getRandomValue( proto ) );
+        }
+
+        $('#btn-random-value-rule').click(function() {
+            var $tr = getActiveRow()
+            if ( !$tr )
+                return false;
+            
+            randomRowValue($tr);           
+        });
+
+        $('#btn-clear-all-rules').click(function() {
+            if (!confirm('Clear all rules?'))
+                    return false;
+
+            $('#table-rules tbody').empty();
+            last_rule_id = 0;
+        })
+
+        $('#btn-delete-rule').click(function() {
+
+            if ( $('#table-rules tbody tr.active').length == 0 )
+                return false;
+
+
+            if (!confirm('Delete?'))
+                return false;
+
+            $('#table-rules tbody tr.active').remove();
+        })
+
+        $('#btn-add-rule').click(function() {
+            console.log('Rule adeedd');
+            addRule();
+        })
+
+        var knocks = [
+            {
+                proto: 'icmp',
+                value: 456,
+                count: 2,
+                pause: 3
+            },
+            {
+                proto: 'tcp',
+                value: 23762,
+                count: 3,
+                pause: 5                
+            }
+        ];
+
+        var settings = {
+            hostname: 'host01.hosts.com',
+            fake_hosts: [],
+            range: {
+                icmp: [200,   999],
+                tcp:  [20000, 50000],
+                udp:  [20000, 50000]
+            }
+        };
+    </script>
+    
+    
+</body>
+</html>
